@@ -1,8 +1,6 @@
 ﻿import random
 
-# ==========================================
-# MATRIZ DE DISTANCIAS
-# ==========================================
+# Distancias en km.
 distancias = {
     ('A', 'B'): 30,
     ('A', 'C'): 50,
@@ -12,7 +10,7 @@ distancias = {
     ('C', 'D'): 15
 }
 
-# Función para obtener distancia entre ciudades
+# Distancia simétrica.
 def obtener_distancia(ciudad1, ciudad2):
     if ciudad1 == ciudad2:
         return 0
@@ -20,34 +18,25 @@ def obtener_distancia(ciudad1, ciudad2):
         return distancias[(ciudad1, ciudad2)]
     return distancias[(ciudad2, ciudad1)]
 
-# ==========================================
-# CONFIGURACIÓN DEL ALGORITMO GENÉTICO
-# ==========================================
+# Parámetros del algoritmo.
 ciudades = ['B', 'C', 'D']
 TAM_POBLACION = 6
 GENERACIONES = 10
 TASA_MUTACION = 0.2
 
-# ==========================================
-# 1. CREAR CROMOSOMA
-# ==========================================
+# Orden de visita aleatorio.
 def crear_individuo():
     ruta = ciudades[:]
     random.shuffle(ruta)
     return ruta
 
-# ==========================================
-# 2. CREAR POBLACIÓN INICIAL
-# ==========================================
 def crear_poblacion():
     poblacion = []
     for _ in range(TAM_POBLACION):
         poblacion.append(crear_individuo())
     return poblacion
 
-# ==========================================
-# 3. FUNCIÓN FITNESS
-# ==========================================
+# Distancia total, incluido el regreso.
 def calcular_distancia(ruta):
     ruta_completa = ['A'] + ruta + ['A']
     distancia_total = 0
@@ -58,9 +47,6 @@ def calcular_distancia(ruta):
         )
     return distancia_total
 
-# ==========================================
-# 4. SELECCIÓN
-# ==========================================
 def seleccionar_padres(poblacion):
     poblacion_ordenada = sorted(
         poblacion,
@@ -68,9 +54,7 @@ def seleccionar_padres(poblacion):
     )
     return poblacion_ordenada[:2]
 
-# ==========================================
-# 5. CRUCE (CROSSOVER)
-# ==========================================
+# Combina rutas sin repetir ciudades.
 def cruce(padre1, padre2):
     punto = random.randint(1, len(padre1) - 1)
     hijo = padre1[:punto]
@@ -79,9 +63,6 @@ def cruce(padre1, padre2):
             hijo.append(ciudad)
     return hijo
 
-# ==========================================
-# 6. MUTACIÓN
-# ==========================================
 def mutacion(individuo):
     if random.random() < TASA_MUTACION:
         i = random.randint(0, len(individuo) - 1)
@@ -89,9 +70,6 @@ def mutacion(individuo):
         individuo[i], individuo[j] = individuo[j], individuo[i]
     return individuo
 
-# ==========================================
-# 7. EVOLUCIÓN
-# ==========================================
 def algoritmo_genetico():
     poblacion = crear_poblacion()
     print("\nPOBLACIÓN INICIAL\n")
@@ -102,24 +80,21 @@ def algoritmo_genetico():
             calcular_distancia(individuo)
         )
 
-    # Evolución
     for generacion in range(GENERACIONES):
         print("\n==============================")
         print(f"GENERACIÓN {generacion + 1}")
         print("==============================")
-        # Selección
         padre1, padre2 = seleccionar_padres(poblacion)
         print("\nMEJORES PADRES:")
         print("Padre 1:", ['A'] + padre1 + ['A'])
         print("Padre 2:", ['A'] + padre2 + ['A'])
         nueva_poblacion = []
-        # Crear nueva generación
+        # Reemplazo sin elitismo.
         while len(nueva_poblacion) < TAM_POBLACION:
             hijo = cruce(padre1, padre2)
             hijo = mutacion(hijo)
             nueva_poblacion.append(hijo)
         poblacion = nueva_poblacion
-        # Mostrar generación
         for individuo in poblacion:
             print(
                 ['A'] + individuo + ['A'],
@@ -127,7 +102,7 @@ def algoritmo_genetico():
                 calcular_distancia(individuo)
             )
 
-    # Mejor solución final
+    # Mejor ruta de la última generación.
     mejor = min(
         poblacion,
         key=lambda x: calcular_distancia(x)
@@ -145,8 +120,5 @@ def algoritmo_genetico():
         "km"
     )
 
-# ==========================================
-# EJECUCIÓN
-# ==========================================
 algoritmo_genetico()
 

@@ -3,7 +3,7 @@ from itertools import combinations
 
 import matplotlib.pyplot as plt
 
-# RF1: ENTRADA DINÁMICA DE DATOS
+# Entrada por consola.
 def pedir_entero(mensaje, minimo):
     while True:
         try:
@@ -47,7 +47,7 @@ TAM_POBLACION = pedir_entero("Tamaño de la población: ", 2)
 GENERACIONES = pedir_entero("Número de generaciones: ", 1)
 TASA_MUTACION = pedir_decimal("Tasa de mutación (0 a 1): ", 0, 1)
 
-# Función para obtener distancia entre ciudades
+# Distancia simétrica.
 def obtener_distancia(ciudad1, ciudad2):
     if ciudad1 == ciudad2:
         return 0
@@ -55,26 +55,19 @@ def obtener_distancia(ciudad1, ciudad2):
         return distancias[(ciudad1, ciudad2)]
     return distancias[(ciudad2, ciudad1)]
 
-# ==========================================
-# 1. CREAR CROMOSOMA
-# ==========================================
+# Orden de visita aleatorio.
 def crear_individuo():
     ruta = ciudades[:]
     random.shuffle(ruta)
     return ruta
 
-# ==========================================
-# 2. CREAR POBLACIÓN INICIAL
-# ==========================================
 def crear_poblacion():
     poblacion = []
     for _ in range(TAM_POBLACION):
         poblacion.append(crear_individuo())
     return poblacion
 
-# ==========================================
-# 3. FUNCIÓN FITNESS
-# ==========================================
+# Distancia total, incluido el regreso.
 def calcular_distancia(ruta):
     ruta_completa = [origen] + ruta + [origen]
     distancia_total = 0
@@ -85,9 +78,6 @@ def calcular_distancia(ruta):
         )
     return distancia_total
 
-# ==========================================
-# 4. SELECCIÓN
-# ==========================================
 def seleccionar_padres(poblacion):
     poblacion_ordenada = sorted(
         poblacion,
@@ -95,11 +85,9 @@ def seleccionar_padres(poblacion):
     )
     return poblacion_ordenada[:2]
 
-# ==========================================
-# 5. CRUCE (CROSSOVER)
-# ==========================================
+# Combina rutas sin repetir ciudades.
 def cruce(padre1, padre2):
-    # Una sola ciudad no tiene un punto de corte interior.
+    # Una ciudad no admite corte.
     if len(padre1) < 2:
         return padre1[:]
     punto = random.randint(1, len(padre1) - 1)
@@ -109,9 +97,6 @@ def cruce(padre1, padre2):
             hijo.append(ciudad)
     return hijo
 
-# ==========================================
-# 6. MUTACIÓN
-# ==========================================
 def mutacion(individuo):
     if random.random() < TASA_MUTACION:
         i = random.randint(0, len(individuo) - 1)
@@ -119,9 +104,6 @@ def mutacion(individuo):
         individuo[i], individuo[j] = individuo[j], individuo[i]
     return individuo
 
-# ==========================================
-# 7. EVOLUCIÓN
-# ==========================================
 def algoritmo_genetico():
     poblacion = crear_poblacion()
     mejores = []
@@ -134,30 +116,27 @@ def algoritmo_genetico():
             calcular_distancia(individuo)
         )
 
-    # Evolución
     for generacion in range(GENERACIONES):
         print("\n==============================")
         print(f"GENERACIÓN {generacion + 1}")
         print("==============================")
-        # Selección
         padre1, padre2 = seleccionar_padres(poblacion)
         print("\nMEJORES PADRES:")
         print("Padre 1:", [origen] + padre1 + [origen])
         print("Padre 2:", [origen] + padre2 + [origen])
         nueva_poblacion = []
-        # Crear nueva generación
+        # Reemplazo sin elitismo.
         while len(nueva_poblacion) < TAM_POBLACION:
             hijo = cruce(padre1, padre2)
             hijo = mutacion(hijo)
             nueva_poblacion.append(hijo)
         poblacion = nueva_poblacion
 
-        # RF2: estadísticas de cada generación.
+        # Mínimo y promedio por generación.
         valores = [calcular_distancia(individuo) for individuo in poblacion]
         mejores.append(min(valores))
         promedios.append(sum(valores) / len(valores))
 
-        # Mostrar generación
         for individuo in poblacion:
             print(
                 [origen] + individuo + [origen],
@@ -165,7 +144,7 @@ def algoritmo_genetico():
                 calcular_distancia(individuo)
             )
 
-    # Mejor solución final
+    # Mejor ruta de la última generación.
     mejor = min(
         poblacion,
         key=lambda x: calcular_distancia(x)
@@ -183,7 +162,7 @@ def algoritmo_genetico():
         "km"
     )
 
-    # RF2: monitoreo y graficación estadística.
+    # Curvas de distancia.
     eje_x = range(1, GENERACIONES + 1)
     plt.plot(eje_x, mejores, label="Mejor solución")
     plt.plot(eje_x, promedios, label="Promedio de la población")
@@ -194,8 +173,5 @@ def algoritmo_genetico():
     plt.legend()
     plt.show()
 
-# ==========================================
-# EJECUCIÓN
-# ==========================================
 algoritmo_genetico()
 
